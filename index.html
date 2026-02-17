@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sahara App - 3D Design Prototype</title>
+    <title>Sahara Sathi - 3D Design Prototype</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
@@ -28,21 +28,21 @@
 
         .screen-content {
             flex: 1;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             background: #fff;
+            position: relative;
         }
 
         .big-button {
             border-radius: 50%;
-            width: 140px;
-            height: 140px;
+            width: 120px;
+            height: 120px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 800;
             color: white;
             text-transform: uppercase;
@@ -54,14 +54,38 @@
 
         .big-button:active { transform: scale(0.95); }
 
+        /* Global Floating SOS Button */
+        #global-sos-btn {
+            position: absolute;
+            bottom: 30px;
+            right: 20px;
+            width: 70px;
+            height: 70px;
+            background: #dc2626;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 18px;
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
+            border: 4px solid white;
+            z-index: 1000;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        #global-sos-btn:active { transform: scale(0.9); }
+
         #sos-hold-ring {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 180px;
-            height: 180px;
-            border: 8px solid rgba(255,255,255,0.3);
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             pointer-events: none;
             display: none;
@@ -69,17 +93,67 @@
         
         #sos-hold-progress {
             position: absolute;
-            top: -8px; left: -8px;
-            width: 180px; height: 180px;
-            border: 8px solid #ff0000;
+            top: -4px; left: -4px;
+            width: 80px; height: 80px;
+            border: 4px solid #fff;
             border-radius: 50%;
             border-top-color: transparent;
-            animation: rotate 2s linear;
+            animation: rotate 1.5s linear;
         }
 
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
-        /* Calling Screen Animation */
+        /* Header UI */
+        .app-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            padding: 10px 0;
+            border-bottom: 2px solid #f1f5f9;
+            margin-bottom: 15px;
+        }
+
+        .lang-switcher {
+            display: flex;
+            background: #f3f4f6;
+            padding: 3px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: bold;
+            align-items: center;
+        }
+        .lang-btn {
+            padding: 4px 8px;
+            border-radius: 16px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .lang-btn.active {
+            background: #f97316;
+            color: white;
+        }
+
+        /* News & Task Cards */
+        .card {
+            background: #fff;
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 12px;
+            position: relative;
+        }
+
+        .urgent {
+            border-color: #ef4444;
+            background: #fef2f2;
+        }
+
+        .completed {
+            opacity: 0.5;
+            text-decoration: line-through;
+            background: #f8fafc;
+        }
+
         .pulse { animation: pulse 1.5s infinite; }
         @keyframes pulse {
             0% { transform: scale(1); opacity: 1; }
@@ -87,7 +161,6 @@
             100% { transform: scale(1); opacity: 1; }
         }
 
-        /* Modal / Call Screen */
         #emergency-screen {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -108,27 +181,13 @@
             left: 20px;
             color: white;
             background: rgba(0,0,0,0.6);
-            padding: 15px;
+            padding: 12px 20px;
             border-radius: 10px;
             pointer-events: none;
         }
 
-        /* Medicine List Styling */
-        .medicine-card {
-            background: white;
-            border-radius: 16px;
-            padding: 12px;
-            border: 2px solid #e2e8f0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 10px;
-            transition: border-color 0.2s;
-        }
-        .medicine-card:has(input:checked) {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -136,81 +195,95 @@
     <div id="canvas-container"></div>
 
     <div class="instructions">
-        <h3 class="font-bold mb-1">Sahara App: Audio & Med Update</h3>
-        <p class="text-sm">• Tap 🔊 to hear medicine instructions</p>
-        <p class="text-sm">• Added 2 new real-world medicines</p>
+        <h3 class="font-bold text-lg">Sahara Sathi</h3>
     </div>
 
     <!-- The Phone Screen Interface -->
     <div id="phone-screen-ui">
-        <div class="bg-black text-white text-[10px] px-6 py-1 flex justify-between items-center">
-            <span id="screen-time">9:10</span>
-            <div class="flex gap-1"><span>📶</span><span>🔋 95%</span></div>
+        <!-- Status Bar -->
+        <div class="bg-black text-white text-[10px] px-6 py-1 flex justify-between items-center z-[1001]">
+            <span id="screen-time">12:30</span>
+            <div class="flex gap-1"><span>📶</span><span>🔋 88%</span></div>
         </div>
 
-        <!-- Main Home Screen -->
-        <div id="screen-home" class="screen-content items-center justify-around py-10">
-            <div onclick="showScreen('health')" class="big-button bg-blue-600">Health</div>
-            <div id="sos-btn" class="big-button bg-red-600 text-3xl">SOS</div>
-            <div onclick="showScreen('youtube')" class="big-button bg-green-600">YouTube</div>
-            
+        <div id="global-sos-btn">
+            SOS
             <div id="sos-hold-ring"><div id="sos-hold-progress"></div></div>
+        </div>
+
+        <!-- Home Screen -->
+        <div id="screen-home" class="screen-content bg-white">
+            <!-- Global Header without brackets -->
+            <div class="app-header">
+                <span class="font-black text-blue-600 text-sm tracking-tight px-1 uppercase">Sahara Sathi</span>
+                <div class="lang-switcher">
+                    <span class="px-1 text-gray-400">🌐</span>
+                    <div id="lang-en" onclick="setLanguage('en')" class="lang-btn active">EN</div>
+                    <div id="lang-hi" onclick="setLanguage('hi')" class="lang-btn">हिंदी</div>
+                </div>
+            </div>
+
+            <!-- Buttons Grid -->
+            <div class="flex-1 flex flex-col items-center justify-center gap-6 py-4">
+                <div onclick="showScreen('health')" class="big-button bg-blue-600">Health</div>
+                <div onclick="showScreen('news')" class="big-button bg-orange-500">News</div>
+                <div onclick="showScreen('youtube')" class="big-button bg-green-600">YouTube</div>
+            </div>
+            <p class="text-[9px] font-bold text-gray-300 text-center pb-2 uppercase tracking-widest">Sathi Home</p>
         </div>
 
         <!-- Health Screen -->
         <div id="screen-health" class="screen-content hidden bg-blue-50">
             <div class="flex items-center gap-4 mb-2">
-                <button onclick="showScreen('home')" class="text-3xl p-2">⬅️</button>
-                <h1 class="text-2xl font-bold">Medicines</h1>
+                <button onclick="showScreen('home')" class="text-3xl p-1">⬅️</button>
+                <h1 class="text-2xl font-bold">Health</h1>
             </div>
-            
-            <div class="flex-1 overflow-y-auto pr-1">
-                <!-- Med 1 -->
-                <div class="medicine-card">
-                    <span class="text-3xl">💊</span>
-                    <div class="flex-1">
-                        <p class="font-bold text-lg leading-tight">BP Pill</p>
-                        <p class="text-sm text-gray-500">1 tablet, Morning</p>
+
+            <div class="flex-1 overflow-y-auto pr-1 pb-24 space-y-4">
+                <div>
+                    <h2 class="text-sm font-bold text-blue-600 uppercase mb-2">Medicines</h2>
+                    <div class="space-y-2">
+                        <div class="card flex items-center gap-3">
+                            <span class="text-2xl">💊</span>
+                            <div class="flex-1">
+                                <p class="font-bold">BP Pill</p>
+                                <p class="text-xs text-gray-500">Morning</p>
+                            </div>
+                            <button onclick="speak('Take your Blood Pressure medicine.', 'en-US')" class="text-2xl">🔊</button>
+                            <input type="checkbox" class="w-6 h-6">
+                        </div>
                     </div>
-                    <button onclick="speak('Take one Blood Pressure pill now. One tablet, in the morning.')" class="text-3xl p-2 hover:bg-gray-100 rounded-full">🔊</button>
-                    <input type="checkbox" class="w-8 h-8 rounded">
                 </div>
 
-                <!-- Med 2 -->
-                <div class="medicine-card">
-                    <span class="text-3xl">🧪</span>
-                    <div class="flex-1">
-                        <p class="font-bold text-lg leading-tight">Sugar Syrup</p>
-                        <p class="text-sm text-gray-500">2 spoons, Lunch</p>
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <h2 class="text-sm font-bold text-blue-600 uppercase">Daily Tasks</h2>
+                        <button onclick="toggleTaskInput()" class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">+ ADD</button>
                     </div>
-                    <button onclick="speak('Take two spoons of Sugar Syrup. Two spoons, at Lunch time.')" class="text-3xl p-2 hover:bg-gray-100 rounded-full">🔊</button>
-                    <input type="checkbox" class="w-8 h-8 rounded">
-                </div>
-
-                <!-- Med 3 (New) -->
-                <div class="medicine-card">
-                    <span class="text-3xl">👁️</span>
-                    <div class="flex-1">
-                        <p class="font-bold text-lg leading-tight">Eye Drops</p>
-                        <p class="text-sm text-gray-500">2 drops, Night</p>
+                    <div id="task-input-box" class="hidden card mb-3 bg-white shadow-lg">
+                        <input id="task-name" type="text" placeholder="Task name..." class="w-full border-b mb-2 p-1 text-sm outline-none">
+                        <div class="flex justify-between items-center">
+                            <label class="text-[10px] flex items-center gap-1"><input id="task-urgent" type="checkbox"> Urgent?</label>
+                            <button onclick="addTask()" class="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold">SAVE</button>
+                        </div>
                     </div>
-                    <button onclick="speak('Put two drops in your left eye. Two drops, at Night.')" class="text-3xl p-2 hover:bg-gray-100 rounded-full">🔊</button>
-                    <input type="checkbox" class="w-8 h-8 rounded">
-                </div>
-
-                <!-- Med 4 (New) -->
-                <div class="medicine-card">
-                    <span class="text-3xl">🦵</span>
-                    <div class="flex-1">
-                        <p class="font-bold text-lg leading-tight">Pain Gel</p>
-                        <p class="text-sm text-gray-500">Apply on Knees</p>
+                    <div id="todo-list" class="space-y-2">
+                        <div class="card flex items-center gap-3 urgent">
+                            <div class="flex-1"><p class="font-bold text-sm">Drink Water</p><p class="text-[9px] text-red-600 font-bold uppercase">Urgent</p></div>
+                            <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-6 h-6">
+                        </div>
                     </div>
-                    <button onclick="speak('Apply pain relief gel on both knees before sleeping.')" class="text-3xl p-2 hover:bg-gray-100 rounded-full">🔊</button>
-                    <input type="checkbox" class="w-8 h-8 rounded">
                 </div>
             </div>
-            
-            <button onclick="triggerEmergency()" class="w-full bg-red-600 text-white font-bold py-4 rounded-2xl text-2xl mt-2">SOS</button>
+        </div>
+
+        <!-- News Screen -->
+        <div id="screen-news" class="screen-content hidden bg-orange-50">
+            <div class="flex items-center gap-4 mb-2">
+                <button onclick="showScreen('home')" class="text-3xl p-1">⬅️</button>
+                <h1 class="text-2xl font-bold">News</h1>
+            </div>
+            <div id="news-container" class="flex-1 overflow-y-auto pr-1 pb-20 space-y-4"></div>
         </div>
 
         <!-- YouTube Screen -->
@@ -219,13 +292,10 @@
                 <button onclick="showScreen('home')" class="text-3xl p-2">⬅️</button>
                 <h1 class="text-2xl font-bold text-red-600">YouTube</h1>
             </div>
-            <div class="flex-1 space-y-4">
+            <div class="flex-1 space-y-4 pb-20">
                 <div class="w-full aspect-video bg-gray-400 rounded-xl flex items-center justify-center text-4xl">▶️</div>
-                <p class="font-bold text-lg">Morning Bhajan</p>
-                <div class="w-full aspect-video bg-gray-400 rounded-xl flex items-center justify-center text-4xl">▶️</div>
-                <p class="font-bold text-lg">Daily Exercise</p>
+                <p class="font-bold text-lg text-center">Bhajan Playlist</p>
             </div>
-            <button onclick="triggerEmergency()" class="w-full bg-red-600 text-white font-bold py-5 rounded-2xl text-2xl mt-4">SOS</button>
         </div>
     </div>
 
@@ -235,59 +305,106 @@
             <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
                 <span class="text-6xl text-red-600">📞</span>
             </div>
-            <h1 class="text-4xl font-black">CALLING SON...</h1>
-            <p class="text-xl opacity-80 mt-2">Speaker Active</p>
+            <h1 class="text-4xl font-black">CALLING FAMILY...</h1>
         </div>
-
-        <div class="bg-black/20 p-6 rounded-3xl w-full max-w-sm mb-10">
-            <h2 class="font-bold text-xl mb-2">📍 LOCATION SENT</h2>
-            <p id="location-text" class="text-lg">Fetching your coordinates...</p>
-        </div>
-
-        <button onclick="cancelEmergency()" class="bg-white text-red-700 px-12 py-5 rounded-full font-black text-2xl shadow-xl">CANCEL</button>
+        <button onclick="cancelEmergency()" class="bg-white text-red-700 px-12 py-5 rounded-full font-black text-2xl">CANCEL</button>
     </div>
 
     <script>
         let scene, camera, renderer, phone;
         let sosTimer;
+        let currentLang = 'en';
         const phoneWidth = 3.5, phoneHeight = 7, phoneDepth = 0.4;
 
-        // --- App Logic ---
-        
-        // Text to Speech Function
-        function speak(text) {
+        // --- News Data ---
+        const newsData = {
+            en: [
+                { tag: 'WEATHER', title: 'Sunny Day', desc: 'Today will be a bright sunny day.', audio: 'Today will be a bright sunny day.' },
+                { tag: 'HEALTH', title: 'Hydration', desc: 'Drink 8 glasses of water daily.', audio: 'Drink 8 glasses of water daily.' },
+                { tag: 'WISDOM', title: 'Thought', desc: 'A smile is the best medicine.', audio: 'A smile is the best medicine.' }
+            ],
+            hi: [
+                { tag: 'मौसम', title: 'सुहाना दिन', desc: 'आज मौसम साफ़ रहेगा।', audio: 'Aaj mausam saaf rahega.' },
+                { tag: 'सेहत', title: 'पानी पीजिए', desc: 'दिन में ८ गिलास पानी ज़रूर पियें।', audio: 'Taazgi ke liye din mein kam se kam aath gilaas paani zaroor piyen.' },
+                { tag: 'सुविचार', title: 'आज की बात', desc: 'मुस्कुराहट हर मुश्किल का हल है।', audio: 'Muskurahat har mushkil ka sabse saral hal hai.' }
+            ]
+        };
+
+        // --- App Global Logic ---
+        function setLanguage(lang) {
+            currentLang = lang;
+            document.getElementById('lang-en').classList.toggle('active', lang === 'en');
+            document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
+            renderNews(); 
+        }
+
+        function renderNews() {
+            const container = document.getElementById('news-container');
+            if(!container) return;
+            container.innerHTML = '';
+            newsData[currentLang].forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card bg-orange-50 border-orange-200';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="bg-orange-200 text-orange-800 text-[9px] px-2 py-1 rounded-full font-bold uppercase">${item.tag}</span>
+                        <button onclick="speak('${item.audio}', '${currentLang === 'hi' ? 'hi-IN' : 'en-US'}')" class="text-xl">🔊</button>
+                    </div>
+                    <p class="font-bold text-base">${item.title}</p>
+                    <p class="text-xs text-gray-700">${item.desc}</p>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function speak(text, lang) {
             if ('speechSynthesis' in window) {
-                // Cancel any ongoing speech first
                 window.speechSynthesis.cancel();
                 const utterance = new SpeechSynthesisUtterance(text);
-                utterance.rate = 0.8; // Slower for seniors
-                utterance.pitch = 1.0;
+                utterance.lang = lang;
+                utterance.rate = 0.8; 
                 window.speechSynthesis.speak(utterance);
-            } else {
-                console.error("Speech synthesis not supported.");
             }
         }
 
         function showScreen(screenId) {
-            ['home', 'health', 'youtube'].forEach(s => document.getElementById(`screen-${s}`).classList.add('hidden'));
-            document.getElementById(`screen-${screenId}`).classList.remove('hidden');
-            window.speechSynthesis.cancel(); // Stop talking when switching screens
+            ['home', 'health', 'youtube', 'news'].forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if(el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`screen-${screenId}`);
+            if(target) target.classList.remove('hidden');
+            window.speechSynthesis.cancel();
+            if(screenId === 'news') renderNews();
         }
 
+        // --- To-Do Logic ---
+        function toggleTaskInput() {
+            const box = document.getElementById('task-input-box');
+            box.classList.toggle('hidden');
+        }
+
+        function addTask() {
+            const name = document.getElementById('task-name').value;
+            const isUrgent = document.getElementById('task-urgent').checked;
+            if(!name) return;
+            const list = document.getElementById('todo-list');
+            const taskDiv = document.createElement('div');
+            taskDiv.className = `card flex items-center gap-3 ${isUrgent ? 'urgent' : ''} mb-2`;
+            taskDiv.innerHTML = `
+                <div class="flex-1"><p class="font-bold text-sm">${name}</p>${isUrgent ? '<p class="text-[9px] text-red-600 font-bold uppercase">Urgent</p>' : ''}</div>
+                <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-6 h-6">
+            `;
+            list.prepend(taskDiv);
+            document.getElementById('task-name').value = '';
+            document.getElementById('task-urgent').checked = false;
+            toggleTaskInput();
+        }
+
+        // --- Emergency ---
         function triggerEmergency() {
             document.getElementById('emergency-screen').style.display = 'flex';
-            speak("Emergency alert triggered. Calling your son and sharing your location.");
-            
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (pos) => {
-                        const lat = pos.coords.latitude.toFixed(4);
-                        const lon = pos.coords.longitude.toFixed(4);
-                        document.getElementById('location-text').innerHTML = `Lat: ${lat}<br>Lon: ${lon}`;
-                    },
-                    () => { document.getElementById('location-text').innerText = "Location Shared (Manual Override)"; }
-                );
-            }
+            speak("Emergency Alert triggered.", "en-US");
         }
 
         function cancelEmergency() {
@@ -295,16 +412,16 @@
             window.speechSynthesis.cancel();
         }
 
-        // SOS Long Press
-        const sosBtn = document.getElementById('sos-btn');
+        const sosBtn = document.getElementById('global-sos-btn');
         const holdRing = document.getElementById('sos-hold-ring');
 
-        function startSOS() {
+        function startSOS(e) {
+            if(e) e.stopPropagation();
             holdRing.style.display = 'block';
             sosTimer = setTimeout(() => {
                 triggerEmergency();
                 holdRing.style.display = 'none';
-            }, 2000);
+            }, 1500);
         }
 
         function cancelSOS() {
@@ -313,14 +430,14 @@
         }
 
         sosBtn.addEventListener('mousedown', startSOS);
-        sosBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startSOS(); });
+        sosBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startSOS(e); });
         window.addEventListener('mouseup', cancelSOS);
         window.addEventListener('touchend', cancelSOS);
 
-        // Update Clock
         setInterval(() => {
             const now = new Date();
-            document.getElementById('screen-time').innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
+            const timeEl = document.getElementById('screen-time');
+            if(timeEl) timeEl.innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
         }, 1000);
 
         // --- Three.js Logic ---
@@ -329,29 +446,25 @@
             scene.background = new THREE.Color(0x0f172a);
             camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 12;
-
             renderer = new THREE.WebGLRenderer({ antialias: true });
             renderer.setSize(window.innerWidth, window.innerHeight);
             renderer.setPixelRatio(window.devicePixelRatio);
             document.getElementById('canvas-container').appendChild(renderer.domElement);
-
             scene.add(new THREE.AmbientLight(0xffffff, 0.7));
             const dl = new THREE.DirectionalLight(0xffffff, 0.5);
             dl.position.set(5, 10, 7.5);
             scene.add(dl);
-
             const materials = [
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), // R
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), // L
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), // T
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), // B
-                new THREE.MeshStandardMaterial({ color: 0x000000 }), // Front
-                new THREE.MeshStandardMaterial({ color: 0x1e293b })  // Back
+                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
+                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
+                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
+                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
+                new THREE.MeshStandardMaterial({ color: 0x000000 }), 
+                new THREE.MeshStandardMaterial({ color: 0x1e293b })  
             ];
             phone = new THREE.Mesh(new THREE.BoxGeometry(phoneWidth, phoneHeight, phoneDepth), materials);
             scene.add(phone);
 
-            // Drag Controls
             let isDragging = false, prevM = { x: 0, y: 0 };
             const onMove = (x, y) => {
                 if(isDragging) {
@@ -366,7 +479,6 @@
             window.addEventListener('touchstart', (e) => { isDragging = true; prevM = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
             window.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX, e.touches[0].clientY));
             window.addEventListener('touchend', () => isDragging = false);
-
             animate();
         }
 
@@ -376,22 +488,17 @@
             const v = new THREE.Vector3(0, 0, phoneDepth/2 + 0.01);
             phone.localToWorld(v);
             v.project(camera);
-            
             const x = (v.x * 0.5 + 0.5) * window.innerWidth;
             const y = (-(v.y * 0.5) + 0.5) * window.innerHeight;
-
             const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(phone.quaternion);
             const view = new THREE.Vector3().subVectors(camera.position, phone.position).normalize();
-            
             if (normal.dot(view) > 0) {
                 ui.style.visibility = 'visible';
                 ui.style.left = `${x}px`;
                 ui.style.top = `${y}px`;
                 const dist = camera.position.distanceTo(phone.position);
                 ui.style.transform = `translate(-50%, -50%) rotateY(${phone.rotation.y}rad) rotateX(${phone.rotation.x}rad) scale(${12 / dist})`;
-            } else {
-                ui.style.visibility = 'hidden';
-            }
+            } else { ui.style.visibility = 'hidden'; }
             renderer.render(scene, camera);
         }
 
@@ -404,3 +511,4 @@
     </script>
 </body>
 </html>
+
