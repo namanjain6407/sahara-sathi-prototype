@@ -3,27 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sahara Sathi - 3D Design Prototype</title>
+    <title>Sahara Sathi - 2D Prototype</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; background-color: #0f172a; font-family: sans-serif; }
-        #canvas-container { width: 100vw; height: 100vh; }
+        body { 
+            margin: 0; 
+            background-color: #0f172a;
+            font-family: 'Inter', sans-serif; 
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
         
-        /* UI Overlay Styling */
-        #phone-screen-ui {
+        .phone-frame {
+            width: 320px;
+            height: 650px;
+            background: #111;
+            border-radius: 45px;
+            border: 6px solid #334155;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            position: relative;
+            padding: 10px;
+            display: flex;
+            flex-direction: column;
+            will-change: transform;
+        }
+
+        .phone-notch {
+            width: 100px;
+            height: 18px;
+            background: #111;
             position: absolute;
-            width: 300px;
-            height: 600px;
-            background: #000;
-            pointer-events: auto;
-            border-radius: 36px;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            border-bottom-left-radius: 12px;
+            border-bottom-right-radius: 12px;
+            z-index: 1002;
+        }
+
+        #phone-screen-ui {
+            flex: 1;
+            background: #fff;
+            border-radius: 32px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
+            position: relative;
             user-select: none;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            visibility: hidden;
         }
 
         .screen-content {
@@ -35,32 +64,45 @@
             position: relative;
         }
 
+        .fade-in { animation: fadeIn 0.2s ease-out forwards; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
         .big-button {
             border-radius: 50%;
-            width: 120px;
-            height: 120px;
+            width: 105px;
+            height: 105px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: 800;
             color: white;
             text-transform: uppercase;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
-            transition: transform 0.1s;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.1s ease;
             cursor: pointer;
             margin: 0 auto;
+            text-align: center;
+        }
+        .big-button:active { transform: scale(0.92); }
+
+        .auth-input {
+            width: 100%;
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 8px;
+            font-size: 14px;
+            outline: none;
         }
 
-        .big-button:active { transform: scale(0.95); }
-
-        /* Global Floating SOS Button */
         #global-sos-btn {
             position: absolute;
-            bottom: 30px;
-            right: 20px;
-            width: 70px;
-            height: 70px;
+            bottom: 25px;
+            right: 15px;
+            width: 65px;
+            height: 65px;
             background: #dc2626;
             border-radius: 50%;
             display: flex;
@@ -68,23 +110,19 @@
             justify-content: center;
             color: white;
             font-weight: 900;
-            font-size: 18px;
-            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.4);
-            border: 4px solid white;
+            font-size: 16px;
+            box-shadow: 0 5px 15px rgba(220, 38, 38, 0.3);
+            border: 3px solid white;
             z-index: 1000;
             cursor: pointer;
-            transition: all 0.2s;
+            display: none;
         }
-        
-        #global-sos-btn:active { transform: scale(0.9); }
 
         #sos-hold-ring {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 80px;
-            height: 80px;
+            width: 75px; height: 75px;
             border: 4px solid rgba(255,255,255,0.3);
             border-radius: 50%;
             pointer-events: none;
@@ -94,75 +132,31 @@
         #sos-hold-progress {
             position: absolute;
             top: -4px; left: -4px;
-            width: 80px; height: 80px;
+            width: 75px; height: 75px;
             border: 4px solid #fff;
             border-radius: 50%;
             border-top-color: transparent;
-            animation: rotate 1.5s linear;
+            animation: rotate 1.5s linear forwards;
         }
-
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-
-        /* Header UI */
-        .app-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            padding: 10px 0;
-            border-bottom: 2px solid #f1f5f9;
-            margin-bottom: 15px;
-        }
 
         .lang-switcher {
             display: flex;
-            background: #f3f4f6;
-            padding: 3px;
+            background: #f1f5f9;
+            padding: 2px;
             border-radius: 20px;
             font-size: 10px;
             font-weight: bold;
-            align-items: center;
         }
-        .lang-btn {
-            padding: 4px 8px;
-            border-radius: 16px;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-        .lang-btn.active {
-            background: #f97316;
-            color: white;
-        }
+        .lang-btn { padding: 4px 8px; border-radius: 16px; cursor: pointer; transition: 0.2s; }
+        .lang-btn.active { background: #f97316; color: white; }
 
-        /* News & Task Cards */
-        .card {
-            background: #fff;
-            border: 2px solid #e2e8f0;
-            border-radius: 16px;
-            padding: 12px;
-            position: relative;
-        }
-
-        .urgent {
-            border-color: #ef4444;
-            background: #fef2f2;
-        }
-
-        .completed {
-            opacity: 0.5;
-            text-decoration: line-through;
-            background: #f8fafc;
-        }
-
-        .pulse { animation: pulse 1.5s infinite; }
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        .card { background: #fff; border: 1.5px solid #e2e8f0; border-radius: 16px; padding: 12px; }
+        .urgent { border-color: #ef4444; background: #fef2f2; }
+        .completed { opacity: 0.5; text-decoration: line-through; }
 
         #emergency-screen {
-            position: fixed;
+            position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             background: #b91c1c;
             color: white;
@@ -173,17 +167,7 @@
             z-index: 2000;
             text-align: center;
             padding: 20px;
-        }
-
-        .instructions {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            color: white;
-            background: rgba(0,0,0,0.6);
-            padding: 12px 20px;
-            border-radius: 10px;
-            pointer-events: none;
+            border-radius: 32px;
         }
 
         ::-webkit-scrollbar { width: 4px; }
@@ -192,150 +176,195 @@
 </head>
 <body>
 
-    <div id="canvas-container"></div>
+    <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div id="phone-screen-ui">
+            <!-- Status Bar -->
+            <div class="bg-black text-white text-[10px] px-6 py-1 flex justify-between items-center z-[1001] pt-3">
+                <span id="screen-time">12:30</span>
+                <div class="flex gap-1"><span>📶</span><span>🔋 88%</span></div>
+            </div>
 
-    <div class="instructions">
-        <h3 class="font-bold text-lg">Sahara Sathi</h3>
-    </div>
+            <!-- Global SOS -->
+            <div id="global-sos-btn">
+                SOS
+                <div id="sos-hold-ring"><div id="sos-hold-progress"></div></div>
+            </div>
 
-    <!-- The Phone Screen Interface -->
-    <div id="phone-screen-ui">
-        <!-- Status Bar -->
-        <div class="bg-black text-white text-[10px] px-6 py-1 flex justify-between items-center z-[1001]">
-            <span id="screen-time">12:30</span>
-            <div class="flex gap-1"><span>📶</span><span>🔋 88%</span></div>
-        </div>
+            <!-- Auth Screen -->
+            <div id="screen-auth" class="screen-content justify-between fade-in">
+                <div class="flex-1 flex flex-col justify-center">
+                    <div class="text-center mb-6">
+                        <span class="text-4xl">👴👵</span>
+                        <h1 class="text-xl font-black text-blue-600 mt-1">SAHARA SATHI</h1>
+                        <p id="auth-title" class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">Login to continue</p>
+                    </div>
+                    <div id="auth-fields">
+                        <input type="text" id="user-phone" placeholder="Your Phone Number" class="auth-input">
+                        <input type="password" id="user-pin" placeholder="4-Digit PIN" class="auth-input">
+                        <div id="register-only-fields" class="hidden border-t border-gray-100 mt-2 pt-2">
+                            <p class="text-[9px] font-bold text-blue-500 mb-2 uppercase">Emergency Contact</p>
+                            <input type="text" id="guardian-name" placeholder="Family Member Name" class="auth-input">
+                            <input type="text" id="guardian-phone" placeholder="Family Member Phone" class="auth-input">
+                        </div>
+                        <button onclick="handleAuth()" class="w-full bg-blue-600 text-white py-3 rounded-2xl font-black text-lg shadow-md mt-2 uppercase">
+                            <span id="btn-label">Login</span>
+                        </button>
+                        <button onclick="toggleAuthMode()" class="w-full text-blue-600 font-bold mt-4 text-[11px]">
+                            <span id="toggle-label">Don't have an account? Sign Up</span>
+                        </button>
+                    </div>
+                </div>
+                <!-- Developer Credit at the bottom -->
+                <p class="text-center text-[10px] text-gray-400 font-bold py-4 uppercase">Developed by Naman Jain</p>
+            </div>
 
-        <div id="global-sos-btn">
-            SOS
-            <div id="sos-hold-ring"><div id="sos-hold-progress"></div></div>
-        </div>
+            <!-- Home Screen -->
+            <div id="screen-home" class="screen-content hidden justify-between fade-in">
+                <div>
+                    <div class="flex justify-between items-center border-b pb-2 mb-4 mt-2">
+                        <span class="font-black text-blue-600 text-xs uppercase">Sahara Sathi</span>
+                        <div class="lang-switcher">
+                            <div id="lang-en" onclick="setLanguage('en')" class="lang-btn active">EN</div>
+                            <div id="lang-hi" onclick="setLanguage('hi')" class="lang-btn">हिंदी</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center justify-center gap-6 py-4">
+                        <div onclick="showScreen('health')" class="big-button bg-blue-600">Health</div>
+                        <div onclick="showScreen('news')" class="big-button bg-orange-500">News</div>
+                        <div onclick="showScreen('youtube')" class="big-button bg-red-600">YouTube</div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-xl border border-gray-100">
+                        <p class="text-[9px] font-bold text-gray-400 uppercase">Emergency Contact</p>
+                        <p id="home-guardian-display" class="font-bold text-gray-700 text-xs">Loading...</p>
+                    </div>
+                </div>
 
-        <!-- Home Screen -->
-        <div id="screen-home" class="screen-content bg-white">
-            <!-- Global Header without brackets -->
-            <div class="app-header">
-                <span class="font-black text-blue-600 text-sm tracking-tight px-1 uppercase">Sahara Sathi</span>
-                <div class="lang-switcher">
-                    <span class="px-1 text-gray-400">🌐</span>
-                    <div id="lang-en" onclick="setLanguage('en')" class="lang-btn active">EN</div>
-                    <div id="lang-hi" onclick="setLanguage('hi')" class="lang-btn">हिंदी</div>
+                <div class="text-center pb-2">
+                    <button onclick="logout()" class="text-[10px] font-bold text-red-400 uppercase">Logout</button>
+                    <p class="text-[10px] text-gray-300 font-bold uppercase mt-2">Developed by Naman Jain</p>
                 </div>
             </div>
 
-            <!-- Buttons Grid -->
-            <div class="flex-1 flex flex-col items-center justify-center gap-6 py-4">
-                <div onclick="showScreen('health')" class="big-button bg-blue-600">Health</div>
-                <div onclick="showScreen('news')" class="big-button bg-orange-500">News</div>
-                <div onclick="showScreen('youtube')" class="big-button bg-green-600">YouTube</div>
-            </div>
-            <p class="text-[9px] font-bold text-gray-300 text-center pb-2 uppercase tracking-widest">Sathi Home</p>
-        </div>
+            <!-- Health Screen -->
+            <div id="screen-health" class="screen-content hidden bg-blue-50 fade-in">
+                <div class="flex items-center gap-4 mb-2">
+                    <button onclick="showScreen('home')" class="text-2xl text-left">⬅️</button>
+                    <h1 class="text-xl font-bold">Health Monitor</h1>
+                </div>
+                
+                <div class="flex-1 overflow-y-auto space-y-4 pb-20">
+                    <div class="card">
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-[10px] font-bold text-blue-600 uppercase">Medicines</h2>
+                            <button onclick="speak('Take your Morning Medicine.', 'en-US')" class="text-lg">🔊</button>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="text-xl">💊</span>
+                            <div class="flex-1"><p class="font-bold text-xs">BP Pill</p><p class="text-[9px] text-gray-500">Morning</p></div>
+                            <input type="checkbox" class="w-5 h-5">
+                        </div>
+                    </div>
 
-        <!-- Health Screen -->
-        <div id="screen-health" class="screen-content hidden bg-blue-50">
-            <div class="flex items-center gap-4 mb-2">
-                <button onclick="showScreen('home')" class="text-3xl p-1">⬅️</button>
-                <h1 class="text-2xl font-bold">Health</h1>
-            </div>
-
-            <div class="flex-1 overflow-y-auto pr-1 pb-24 space-y-4">
-                <div>
-                    <h2 class="text-sm font-bold text-blue-600 uppercase mb-2">Medicines</h2>
-                    <div class="space-y-2">
-                        <div class="card flex items-center gap-3">
-                            <span class="text-2xl">💊</span>
-                            <div class="flex-1">
-                                <p class="font-bold">BP Pill</p>
-                                <p class="text-xs text-gray-500">Morning</p>
+                    <!-- To-Do Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <h2 class="text-[10px] font-bold text-blue-600 uppercase">To-Do List</h2>
+                            <button onclick="toggleTaskInput()" class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-bold">+ ADD</button>
+                        </div>
+                        <div id="task-input-box" class="hidden card mb-3 bg-white shadow-lg border-blue-200">
+                            <input id="task-name" type="text" placeholder="Task name..." class="w-full border-b mb-2 p-1 text-xs outline-none">
+                            <div class="flex justify-between items-center">
+                                <label class="text-[9px] flex items-center gap-1"><input id="task-urgent" type="checkbox"> Urgent?</label>
+                                <button onclick="addTask()" class="bg-blue-600 text-white px-3 py-1 rounded text-[9px] font-bold">SAVE</button>
                             </div>
-                            <button onclick="speak('Take your Blood Pressure medicine.', 'en-US')" class="text-2xl">🔊</button>
-                            <input type="checkbox" class="w-6 h-6">
+                        </div>
+                        <div id="todo-list" class="space-y-2">
+                            <div class="card flex items-center gap-3 urgent">
+                                <div class="flex-1"><p class="font-bold text-xs">Drink Water</p><p class="text-[8px] text-red-600 font-bold uppercase">Urgent</p></div>
+                                <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-5 h-5">
+                            </div>
                         </div>
                     </div>
                 </div>
+                <p class="text-center text-[10px] text-gray-400 font-bold py-2 uppercase">Developed by Naman Jain</p>
+            </div>
 
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <h2 class="text-sm font-bold text-blue-600 uppercase">Daily Tasks</h2>
-                        <button onclick="toggleTaskInput()" class="bg-blue-600 text-white px-2 py-1 rounded text-[10px] font-bold">+ ADD</button>
-                    </div>
-                    <div id="task-input-box" class="hidden card mb-3 bg-white shadow-lg">
-                        <input id="task-name" type="text" placeholder="Task name..." class="w-full border-b mb-2 p-1 text-sm outline-none">
-                        <div class="flex justify-between items-center">
-                            <label class="text-[10px] flex items-center gap-1"><input id="task-urgent" type="checkbox"> Urgent?</label>
-                            <button onclick="addTask()" class="bg-green-600 text-white px-3 py-1 rounded text-[10px] font-bold">SAVE</button>
-                        </div>
-                    </div>
-                    <div id="todo-list" class="space-y-2">
-                        <div class="card flex items-center gap-3 urgent">
-                            <div class="flex-1"><p class="font-bold text-sm">Drink Water</p><p class="text-[9px] text-red-600 font-bold uppercase">Urgent</p></div>
-                            <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-6 h-6">
-                        </div>
-                    </div>
+            <!-- News Screen -->
+            <div id="screen-news" class="screen-content hidden bg-orange-50 fade-in">
+                <div class="flex items-center gap-4 mb-2">
+                    <button onclick="showScreen('home')" class="text-2xl text-left">⬅️</button>
+                    <h1 class="text-xl font-bold">Today's News</h1>
                 </div>
+                <div id="news-container" class="flex-1 overflow-y-auto space-y-3 pb-20"></div>
+                <p class="text-center text-[10px] text-gray-400 font-bold py-2 uppercase">Developed by Naman Jain</p>
             </div>
-        </div>
 
-        <!-- News Screen -->
-        <div id="screen-news" class="screen-content hidden bg-orange-50">
-            <div class="flex items-center gap-4 mb-2">
-                <button onclick="showScreen('home')" class="text-3xl p-1">⬅️</button>
-                <h1 class="text-2xl font-bold">News</h1>
+            <!-- YouTube Screen -->
+            <div id="screen-youtube" class="screen-content hidden bg-red-50 fade-in">
+                <button onclick="showScreen('home')" class="text-2xl mb-4 text-left">⬅️ Back</button>
+                <h1 class="text-xl font-bold">Relaxation</h1>
+                <div class="w-full aspect-video bg-gray-300 rounded-xl mt-4 flex items-center justify-center shadow-inner">▶️ Play</div>
+                <div class="mt-4 text-center">
+                    <p class="font-bold text-sm">Bhajan Playlist</p>
+                    <p class="text-[10px] text-gray-500 mt-1">Tap to start peaceful music</p>
+                </div>
+                <p class="text-center text-[10px] text-gray-400 font-bold py-4 mt-auto uppercase">Developed by Naman Jain</p>
             </div>
-            <div id="news-container" class="flex-1 overflow-y-auto pr-1 pb-20 space-y-4"></div>
-        </div>
 
-        <!-- YouTube Screen -->
-        <div id="screen-youtube" class="screen-content hidden bg-red-50">
-            <div class="flex items-center gap-4 mb-4">
-                <button onclick="showScreen('home')" class="text-3xl p-2">⬅️</button>
-                <h1 class="text-2xl font-bold text-red-600">YouTube</h1>
-            </div>
-            <div class="flex-1 space-y-4 pb-20">
-                <div class="w-full aspect-video bg-gray-400 rounded-xl flex items-center justify-center text-4xl">▶️</div>
-                <p class="font-bold text-lg text-center">Bhajan Playlist</p>
+            <!-- Emergency Overlay -->
+            <div id="emergency-screen">
+                <h1 class="text-2xl font-black uppercase mb-4">Emergency!</h1>
+                <div class="bg-red-800 p-4 rounded-2xl border border-red-400 w-full shadow-2xl">
+                    <p class="text-sm opacity-80 uppercase font-bold mb-1">Calling Now:</p>
+                    <p id="sos-target-name" class="text-xl font-black text-yellow-300">Guardian</p>
+                    <p id="sos-target-phone" class="text-sm opacity-90 mt-1">9876543210</p>
+                </div>
+                <p class="text-[10px] font-bold tracking-widest uppercase mt-6 animate-pulse">GPS Location Sent</p>
+                <button onclick="cancelEmergency()" class="bg-white text-red-700 px-12 py-4 rounded-full font-black mt-10 shadow-lg">STOP</button>
             </div>
         </div>
-    </div>
-
-    <!-- Emergency Simulation Overlay -->
-    <div id="emergency-screen">
-        <div class="mb-10 pulse">
-            <div class="w-32 h-32 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                <span class="text-6xl text-red-600">📞</span>
-            </div>
-            <h1 class="text-4xl font-black">CALLING FAMILY...</h1>
-        </div>
-        <button onclick="cancelEmergency()" class="bg-white text-red-700 px-12 py-5 rounded-full font-black text-2xl">CANCEL</button>
     </div>
 
     <script>
-        let scene, camera, renderer, phone;
+        let isSignUp = false;
         let sosTimer;
         let currentLang = 'en';
-        const phoneWidth = 3.5, phoneHeight = 7, phoneDepth = 0.4;
+        let guardianInfo = { name: "Naman Jain", phone: "9876543210" };
 
-        // --- News Data ---
         const newsData = {
             en: [
-                { tag: 'WEATHER', title: 'Sunny Day', desc: 'Today will be a bright sunny day.', audio: 'Today will be a bright sunny day.' },
-                { tag: 'HEALTH', title: 'Hydration', desc: 'Drink 8 glasses of water daily.', audio: 'Drink 8 glasses of water daily.' },
-                { tag: 'WISDOM', title: 'Thought', desc: 'A smile is the best medicine.', audio: 'A smile is the best medicine.' }
+                { tag: 'INDIA', title: 'Space Mission', desc: 'India planning new moon landing project.', audio: 'India planning new moon landing project.' },
+                { tag: 'WORLD', title: 'Climate Summit', desc: 'World leaders meet to discuss green energy.', audio: 'World leaders meet to discuss green energy.' },
+                { tag: 'SPORTS', title: 'Cricket Win', desc: 'Team India wins the final match in style.', audio: 'Team India wins the final match in style.' },
+                { tag: 'WEATHER', title: 'Sunny Day', desc: 'Today will be bright and sunny.', audio: 'Today will be bright and sunny.' },
+                { tag: 'WISDOM', title: 'Daily Thought', desc: "A kind word can change someone's day.", audio: "A kind word can change someone's day." }
             ],
             hi: [
-                { tag: 'मौसम', title: 'सुहाना दिन', desc: 'आज मौसम साफ़ रहेगा।', audio: 'Aaj mausam saaf rahega.' },
-                { tag: 'सेहत', title: 'पानी पीजिए', desc: 'दिन में ८ गिलास पानी ज़रूर पियें।', audio: 'Taazgi ke liye din mein kam se kam aath gilaas paani zaroor piyen.' },
-                { tag: 'सुविचार', title: 'आज की बात', desc: 'मुस्कुराहट हर मुश्किल का हल है।', audio: 'Muskurahat har mushkil ka sabse saral hal hai.' }
+                { tag: 'भारत', title: 'अंतरिक्ष मिशन', desc: 'भारत नए चंद्रमा लैंडिंग प्रोजेक्ट की योजना बना रहा है।', audio: 'Bharat naye chandrama landing project ki yojna bana raha hai.' },
+                { tag: 'दुनिया', title: 'जलवायु शिखर सम्मेलन', desc: 'विश्व नेता हरित ऊर्जा पर चर्चा के लिए मिले।', audio: 'Vishwa neta harit oorja par charcha ke liye mile.' },
+                { tag: 'खेल', title: 'क्रिकेट जीत', desc: 'टीम इंडिया ने शानदार अंदाज़ में फाइनल मैच जीता।', audio: 'Team India ne shaandaar andaaz mein final match jeeta.' },
+                { tag: 'मौसम', title: 'सुहाना दिन', desc: 'आज मौसम साफ़ और धूप वाला रहेगा।', audio: 'Aaj mausam saaf aur dhoop wala rahega.' },
+                { tag: 'सुविचार', title: 'आज की बात', desc: 'एक मीठा शब्द किसी का दिन बदल sakta hai.', audio: 'Ek meetha shabd kisi ka din badal sakta hai.' }
             ]
         };
 
-        // --- App Global Logic ---
         function setLanguage(lang) {
             currentLang = lang;
             document.getElementById('lang-en').classList.toggle('active', lang === 'en');
             document.getElementById('lang-hi').classList.toggle('active', lang === 'hi');
-            renderNews(); 
+            if (!document.getElementById('screen-news').classList.contains('hidden')) renderNews();
+        }
+
+        function speak(text, langCode) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const utter = new SpeechSynthesisUtterance(text);
+                utter.lang = langCode || (currentLang === 'hi' ? 'hi-IN' : 'en-US');
+                utter.rate = 0.85;
+                window.speechSynthesis.speak(utter);
+            }
         }
 
         function renderNews() {
@@ -343,45 +372,23 @@
             if(!container) return;
             container.innerHTML = '';
             newsData[currentLang].forEach(item => {
-                const card = document.createElement('div');
-                card.className = 'card bg-orange-50 border-orange-200';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-2">
-                        <span class="bg-orange-200 text-orange-800 text-[9px] px-2 py-1 rounded-full font-bold uppercase">${item.tag}</span>
-                        <button onclick="speak('${item.audio}', '${currentLang === 'hi' ? 'hi-IN' : 'en-US'}')" class="text-xl">🔊</button>
+                const div = document.createElement('div');
+                div.className = 'card bg-white border-orange-100';
+                const safeAudio = item.audio.replace(/'/g, "\\'");
+                div.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <span class="bg-orange-100 text-orange-700 text-[8px] px-2 py-0.5 rounded-full font-bold uppercase">${item.tag}</span>
+                        <button onclick="speak('${safeAudio}')" class="text-lg">🔊</button>
                     </div>
-                    <p class="font-bold text-base">${item.title}</p>
-                    <p class="text-xs text-gray-700">${item.desc}</p>
+                    <p class="font-bold text-xs mb-1">${item.title}</p>
+                    <p class="text-[10px] text-gray-600 leading-tight">${item.desc}</p>
                 `;
-                container.appendChild(card);
+                container.appendChild(div);
             });
         }
 
-        function speak(text, lang) {
-            if ('speechSynthesis' in window) {
-                window.speechSynthesis.cancel();
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = lang;
-                utterance.rate = 0.8; 
-                window.speechSynthesis.speak(utterance);
-            }
-        }
-
-        function showScreen(screenId) {
-            ['home', 'health', 'youtube', 'news'].forEach(s => {
-                const el = document.getElementById(`screen-${s}`);
-                if(el) el.classList.add('hidden');
-            });
-            const target = document.getElementById(`screen-${screenId}`);
-            if(target) target.classList.remove('hidden');
-            window.speechSynthesis.cancel();
-            if(screenId === 'news') renderNews();
-        }
-
-        // --- To-Do Logic ---
         function toggleTaskInput() {
-            const box = document.getElementById('task-input-box');
-            box.classList.toggle('hidden');
+            document.getElementById('task-input-box').classList.toggle('hidden');
         }
 
         function addTask() {
@@ -389,22 +396,58 @@
             const isUrgent = document.getElementById('task-urgent').checked;
             if(!name) return;
             const list = document.getElementById('todo-list');
-            const taskDiv = document.createElement('div');
-            taskDiv.className = `card flex items-center gap-3 ${isUrgent ? 'urgent' : ''} mb-2`;
-            taskDiv.innerHTML = `
-                <div class="flex-1"><p class="font-bold text-sm">${name}</p>${isUrgent ? '<p class="text-[9px] text-red-600 font-bold uppercase">Urgent</p>' : ''}</div>
-                <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-6 h-6">
+            const div = document.createElement('div');
+            div.className = `card flex items-center gap-3 ${isUrgent ? 'urgent' : ''}`;
+            div.innerHTML = `
+                <div class="flex-1"><p class="font-bold text-xs">${name}</p>${isUrgent ? '<p class="text-[8px] text-red-600 font-bold uppercase">Urgent</p>' : ''}</div>
+                <input type="checkbox" onchange="this.parentElement.classList.toggle('completed')" class="w-5 h-5">
             `;
-            list.prepend(taskDiv);
+            list.prepend(div);
             document.getElementById('task-name').value = '';
             document.getElementById('task-urgent').checked = false;
             toggleTaskInput();
         }
 
-        // --- Emergency ---
+        function toggleAuthMode() {
+            isSignUp = !isSignUp;
+            document.getElementById('auth-title').innerText = isSignUp ? 'Create New Account' : 'Login to continue';
+            document.getElementById('btn-label').innerText = isSignUp ? 'Sign Up' : 'Login';
+            document.getElementById('toggle-label').innerText = isSignUp ? 'Already have an account? Login' : "Don't have an account? Sign Up";
+            document.getElementById('register-only-fields').classList.toggle('hidden', !isSignUp);
+        }
+
+        function handleAuth() {
+            if (isSignUp) {
+                const name = document.getElementById('guardian-name').value;
+                const phone = document.getElementById('guardian-phone').value;
+                if(name && phone) guardianInfo = { name, phone };
+            }
+            document.getElementById('home-guardian-display').innerText = `${guardianInfo.name} (${guardianInfo.phone})`;
+            showScreen('home');
+            document.getElementById('global-sos-btn').style.display = 'flex';
+        }
+
+        function logout() {
+            showScreen('auth');
+            document.getElementById('global-sos-btn').style.display = 'none';
+        }
+
+        function showScreen(screenId) {
+            ['auth', 'home', 'health', 'news', 'youtube'].forEach(s => {
+                const el = document.getElementById(`screen-${s}`);
+                if(el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(`screen-${screenId}`);
+            if(target) target.classList.remove('hidden');
+            if (screenId === 'news') renderNews();
+            window.speechSynthesis.cancel();
+        }
+
         function triggerEmergency() {
+            document.getElementById('sos-target-name').innerText = guardianInfo.name;
+            document.getElementById('sos-target-phone').innerText = guardianInfo.phone;
             document.getElementById('emergency-screen').style.display = 'flex';
-            speak("Emergency Alert triggered.", "en-US");
+            speak(`Emergency. Calling ${guardianInfo.name} and sharing your location.`);
         }
 
         function cancelEmergency() {
@@ -439,76 +482,6 @@
             const timeEl = document.getElementById('screen-time');
             if(timeEl) timeEl.innerText = now.getHours() + ":" + String(now.getMinutes()).padStart(2, '0');
         }, 1000);
-
-        // --- Three.js Logic ---
-        function init3D() {
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x0f172a);
-            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 12;
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.setPixelRatio(window.devicePixelRatio);
-            document.getElementById('canvas-container').appendChild(renderer.domElement);
-            scene.add(new THREE.AmbientLight(0xffffff, 0.7));
-            const dl = new THREE.DirectionalLight(0xffffff, 0.5);
-            dl.position.set(5, 10, 7.5);
-            scene.add(dl);
-            const materials = [
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
-                new THREE.MeshStandardMaterial({ color: 0x334155 }), 
-                new THREE.MeshStandardMaterial({ color: 0x000000 }), 
-                new THREE.MeshStandardMaterial({ color: 0x1e293b })  
-            ];
-            phone = new THREE.Mesh(new THREE.BoxGeometry(phoneWidth, phoneHeight, phoneDepth), materials);
-            scene.add(phone);
-
-            let isDragging = false, prevM = { x: 0, y: 0 };
-            const onMove = (x, y) => {
-                if(isDragging) {
-                    phone.rotation.y += (x - prevM.x) * 0.01;
-                    phone.rotation.x += (y - prevM.y) * 0.01;
-                }
-                prevM = { x, y };
-            };
-            window.addEventListener('mousedown', () => isDragging = true);
-            window.addEventListener('mouseup', () => isDragging = false);
-            window.addEventListener('mousemove', (e) => onMove(e.offsetX, e.offsetY));
-            window.addEventListener('touchstart', (e) => { isDragging = true; prevM = { x: e.touches[0].clientX, y: e.touches[0].clientY }; });
-            window.addEventListener('touchmove', (e) => onMove(e.touches[0].clientX, e.touches[0].clientY));
-            window.addEventListener('touchend', () => isDragging = false);
-            animate();
-        }
-
-        function animate() {
-            requestAnimationFrame(animate);
-            const ui = document.getElementById('phone-screen-ui');
-            const v = new THREE.Vector3(0, 0, phoneDepth/2 + 0.01);
-            phone.localToWorld(v);
-            v.project(camera);
-            const x = (v.x * 0.5 + 0.5) * window.innerWidth;
-            const y = (-(v.y * 0.5) + 0.5) * window.innerHeight;
-            const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(phone.quaternion);
-            const view = new THREE.Vector3().subVectors(camera.position, phone.position).normalize();
-            if (normal.dot(view) > 0) {
-                ui.style.visibility = 'visible';
-                ui.style.left = `${x}px`;
-                ui.style.top = `${y}px`;
-                const dist = camera.position.distanceTo(phone.position);
-                ui.style.transform = `translate(-50%, -50%) rotateY(${phone.rotation.y}rad) rotateX(${phone.rotation.x}rad) scale(${12 / dist})`;
-            } else { ui.style.visibility = 'hidden'; }
-            renderer.render(scene, camera);
-        }
-
-        window.onload = init3D;
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
     </script>
 </body>
 </html>
-
